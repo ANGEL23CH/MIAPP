@@ -1,0 +1,22 @@
+PRESS PLANNING SCANNER — GENERAR APK EN GITHUB
+
+1. Crear un repositorio nuevo en GitHub.
+2. Descomprimir PressPlanningScanner-GitHub-APK.zip.
+3. Subir TODO EL CONTENIDO INTERNO al repositorio, no subir solamente el ZIP.
+4. Verificar que exista esta ruta:
+   .github/workflows/build-apk.yml
+5. Entrar a Actions.
+6. Abrir "Compilar APK Android".
+7. Presionar "Run workflow".
+8. Esperar a que aparezca la marca verde.
+9. Abrir la ejecución.
+10. Descargar el artifact "PressPlanningScanner-APK".
+11. Descomprimirlo e instalar PressPlanningScanner.apk en Android.
+
+Dirección que debe configurarse dentro de la app:
+http://IP_DE_LA_COMPUTADORA:8787/mobile
+
+IMPORTANTE:
+- El teléfono y la computadora servidor deben estar en la misma red.
+- La computadora servidor debe tener una IP fija o reservada.
+- El APK generado es para pruebas e instalación interna.

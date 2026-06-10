@@ -1,0 +1,5 @@
+Para abrir el escáner APK desde Chrome Android:
+
+window.location.href = "pressplanning://scan?callback=" + encodeURIComponent(window.location.href);
+
+La APK regresará al callback agregando ?scanResult=VALOR. La versión web V7.7.27 ya reconoce ese parámetro mediante PressPlanningSetBarcode/scannerResultFromUrl. La operación recomendada es usar directamente la APK, porque conserva mejor la sesión y evita cambiar entre aplicaciones.

@@ -1,0 +1,24 @@
+PRESS PLANNING SCANNER - PROYECTO ANDROID
+
+FUNCIÓN
+- Abre la pantalla /mobile del servidor Press Planning.
+- El botón Escanear y el botón Cámara de la página llaman al lector nativo.
+- Después de leer la etiqueta, el valor vuelve automáticamente al campo Barcode y se ejecuta la búsqueda.
+- También acepta el enlace pressplanning://scan?callback=URL para abrir el escáner desde un navegador Android.
+
+COMPILACIÓN
+1. Instale Android Studio estable.
+2. Abra esta carpeta como proyecto.
+3. Espere la sincronización de Gradle.
+4. Build > Generate App Bundles or APKs > Generate APKs.
+5. Para producción, genere una clave de firma y un APK release firmado.
+
+INSTALACIÓN DE PRUEBA
+1. Copie el APK al teléfono Android.
+2. Autorice temporalmente "Instalar apps desconocidas" para la aplicación que abrió el archivo.
+3. Instale Press Planning Scanner.
+4. En el primer inicio escriba: http://IP_DE_LA_PC:8787/mobile
+5. El teléfono y la PC deben estar conectados a la misma red.
+
+NOTA
+Este proyecto permite HTTP local porque el servidor actual trabaja dentro de la red de la empresa. No publique ese servidor directamente en Internet.
