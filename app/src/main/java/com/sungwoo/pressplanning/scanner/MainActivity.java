@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.Gravity;
-import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
@@ -42,9 +41,14 @@ public class MainActivity extends Activity {
         preferences = getSharedPreferences(PREFS, MODE_PRIVATE);
         readDeepLink(getIntent());
         buildScreen();
+
         String saved = preferences.getString(KEY_SERVER_URL, "");
-        if (saved == null || saved.trim().isEmpty()) showServerDialog(true);
-        else loadServer(saved);
+        if (saved == null || saved.trim().isEmpty()) {
+            openProductionReport();
+            Toast.makeText(this, "Prototipo local abierto. Configura Servidor para volver al módulo web.", Toast.LENGTH_LONG).show();
+        } else {
+            loadServer(saved);
+        }
     }
 
     @Override
@@ -75,19 +79,23 @@ public class MainActivity extends Activity {
 
         serverLabel = new TextView(this);
         serverLabel.setTextColor(Color.WHITE);
-        serverLabel.setTextSize(11);
+        serverLabel.setTextSize(10);
         serverLabel.setMaxLines(2);
         toolbar.addView(serverLabel, new LinearLayout.LayoutParams(0, dp(48), 1f));
 
-        Button refresh = toolbarButton("Actualizar");
-        refresh.setOnClickListener(v -> webView.reload());
-        toolbar.addView(refresh);
+        Button web = toolbarButton("Web");
+        web.setOnClickListener(v -> openServerHome());
+        toolbar.addView(web);
+
+        Button report = toolbarButton("Reporte");
+        report.setOnClickListener(v -> openProductionReport());
+        toolbar.addView(report);
 
         Button server = toolbarButton("Servidor");
         server.setOnClickListener(v -> showServerDialog(false));
         toolbar.addView(server);
 
-        Button scan = toolbarButton("Escanear");
+        Button scan = toolbarButton("Scan");
         scan.setOnClickListener(v -> startScanner());
         toolbar.addView(scan);
         root.addView(toolbar, new LinearLayout.LayoutParams(-1, -2));
@@ -100,7 +108,7 @@ public class MainActivity extends Activity {
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        settings.setUserAgentString(settings.getUserAgentString() + " PressPlanningScanner/1.0");
+        settings.setUserAgentString(settings.getUserAgentString() + " PressPlanningScanner/1.1");
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         webView.setWebChromeClient(new WebChromeClient());
@@ -113,17 +121,38 @@ public class MainActivity extends Activity {
     }
 
     private Button toolbarButton(String text) {
-        Button b = new Button(this);
-        b.setText(text);
-        b.setTextSize(11);
-        b.setAllCaps(false);
-        b.setMinWidth(0);
-        b.setMinimumWidth(0);
-        b.setPadding(dp(7), 0, dp(7), 0);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, dp(44));
-        lp.setMargins(dp(3), 0, 0, 0);
-        b.setLayoutParams(lp);
-        return b;
+        Button button = new Button(this);
+        button.setText(text);
+        button.setTextSize(10);
+        button.setAllCaps(false);
+        button.setMinWidth(0);
+        button.setMinimumWidth(0);
+        button.setPadding(dp(6), 0, dp(6), 0);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-2, dp(44));
+        params.setMargins(dp(3), 0, 0, 0);
+        button.setLayoutParams(params);
+        return button;
+    }
+
+    private void openServerHome() {
+        String saved = preferences.getString(KEY_SERVER_URL, "");
+        if (saved == null || saved.trim().isEmpty()) {
+            showServerDialog(false);
+        } else {
+            loadServer(saved);
+        }
+    }
+
+    private void openProductionReport() {
+        webView.getSettings().setAllowFileAccess(false);
+        serverLabel.setText("Reporte diario\nPrototipo local");
+        webView.loadDataWithBaseURL(
+                "https://pressplanning.local/report/",
+                ProductionReportHtml.get(),
+                "text/html",
+                "UTF-8",
+                null
+        );
     }
 
     private void showServerDialog(boolean required) {
@@ -139,7 +168,9 @@ public class MainActivity extends Activity {
                 .setMessage("Escribe la IP de la computadora servidor y el puerto 8787.")
                 .setView(input)
                 .setPositiveButton("Guardar", null)
-                .setNegativeButton(required ? "Cerrar" : "Cancelar", (d, w) -> { if (required) finish(); })
+                .setNegativeButton(required ? "Ver reporte" : "Cancelar", (d, w) -> {
+                    if (required) openProductionReport();
+                })
                 .create();
         dialog.setOnShowListener(v -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(btn -> {
             String normalized = normalizeServerUrl(input.getText().toString());
@@ -169,6 +200,7 @@ public class MainActivity extends Activity {
     }
 
     private void loadServer(String url) {
+        webView.getSettings().setAllowFileAccess(false);
         serverLabel.setText(url);
         webView.loadUrl(url);
     }
@@ -216,10 +248,14 @@ public class MainActivity extends Activity {
 
     public class ScannerBridge {
         @JavascriptInterface
-        public void scanBarcode() { runOnUiThread(MainActivity.this::startScanner); }
+        public void scanBarcode() {
+            runOnUiThread(MainActivity.this::startScanner);
+        }
     }
 
-    private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
+    }
 
     @Override
     public void onBackPressed() {
